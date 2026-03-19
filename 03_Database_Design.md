@@ -1,45 +1,49 @@
-🗃️ Database Design: Dynamic Translation System (POC)
+# 🗃️ Database Design: Dynamic Translation System (POC)
 
 ---
 
-🎯 Objective
+## 🎯 Objective
 
 This document defines:
 
-- Database tables
-- Field structures
-- Relationships
-- Constraints
+* Database tables
+* Field structures
+* Relationships
+* Constraints
 
 The goal is to ensure:
 
-- Every translation is traceable
-- Every translation is linked to:
-  - The correct record
-  - The correct field
-  - The original text
+* Every translation is **traceable**
+* Every translation is linked to:
+
+  * The correct record
+  * The correct field
+  * The original text
 
 ---
 
-🧩 Overview of Tables
+## 🧩 Overview of Tables
 
-We will use 2 main tables:
+We will use **2 main tables**:
 
+```id="tables-overview"
 1. patient_advice   → stores original data
 2. translations     → stores translated data
+```
 
 ---
 
-🧱 Table 1: "patient_advice"
+## 🧱 Table 1: `patient_advice`
 
-📌 Purpose:
+### 📌 Purpose:
 
-Stores the original user input
+Stores the **original user input**
 
 ---
 
-🧾 Schema
+### 🧾 Schema
 
+```sql id="patient-advice-schema"
 CREATE TABLE patient_advice (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER,
@@ -51,32 +55,35 @@ CREATE TABLE patient_advice (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
 
 ---
 
-🧠 Field Explanation
+### 🧠 Field Explanation
 
-Field| Description
-id| Unique record ID
-patient_id| Identifier for patient
-nutrition_advice| Original nutrition advice
-exercise_advice| Original exercise advice
-injury_care_advice| Original injury care advice
-created_at| Record creation time
-updated_at| Last update time
-
----
-
-🧱 Table 2: "translations"
-
-📌 Purpose:
-
-Stores translated text with full traceability
+| Field              | Description                 |
+| ------------------ | --------------------------- |
+| id                 | Unique record ID            |
+| patient_id         | Identifier for patient      |
+| nutrition_advice   | Original nutrition advice   |
+| exercise_advice    | Original exercise advice    |
+| injury_care_advice | Original injury care advice |
+| created_at         | Record creation time        |
+| updated_at         | Last update time            |
 
 ---
 
-🧾 Schema
+## 🧱 Table 2: `translations`
 
+### 📌 Purpose:
+
+Stores **translated text** with full traceability
+
+---
+
+### 🧾 Schema
+
+```sql id="translations-schema"
 CREATE TABLE translations (
     id SERIAL PRIMARY KEY,
 
@@ -95,77 +102,88 @@ CREATE TABLE translations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
 
 ---
 
-🔗 Relationships
+## 🔗 Relationships
 
+```id="relationship"
 patient_advice.id  →  translations.entity_id
+```
 
 ---
 
-Example Mapping
+### Example Mapping
 
+```id="mapping-example"
 patient_advice:
 id = 1
 
 translations:
 entity_id = 1
 field_name = 'nutrition_advice'
+```
 
 ---
 
-🧠 Why This Design?
+## 🧠 Why This Design?
 
-✅ 1. Field-Level Mapping
+### ✅ 1. Field-Level Mapping
 
 Each translation is stored separately:
 
+```id="field-mapping"
 nutrition_advice → one row
 exercise_advice → one row
+```
 
 ---
 
-✅ 2. Supports Multiple Languages
+### ✅ 2. Supports Multiple Languages
 
+```id="multi-language"
 Same field → multiple language entries
+```
 
 Example:
 
-- nutrition_advice → Hindi
-- nutrition_advice → Marathi
+* nutrition_advice → Hindi
+* nutrition_advice → Marathi
 
 ---
 
-✅ 3. Full Traceability
+### ✅ 3. Full Traceability
 
 Each row stores:
 
-- original_text
-- translated_text
-- field_name
-- entity reference
+* original_text
+* translated_text
+* field_name
+* entity reference
 
 ---
 
-✅ 4. Extensible
+### ✅ 4. Extensible
 
 Later you can add:
 
-- more fields
-- more entities (not just patient_advice)
+* more fields
+* more entities (not just patient_advice)
 
 ---
 
-🔐 Constraints (VERY IMPORTANT)
+## 🔐 Constraints (VERY IMPORTANT)
 
 Add this unique constraint:
 
+```sql id="unique-constraint"
 UNIQUE (entity_type, entity_id, field_name, language_code)
+```
 
 ---
 
-🧠 Why?
+### 🧠 Why?
 
 Prevents duplicate translations like:
 
@@ -173,12 +191,13 @@ Prevents duplicate translations like:
 
 ---
 
-🧪 Sample Data
+## 🧪 Sample Data
 
 ---
 
-🧾 patient_advice
+### 🧾 patient_advice
 
+```json id="sample-patient"
 {
   "id": 1,
   "patient_id": 101,
@@ -186,11 +205,13 @@ Prevents duplicate translations like:
   "exercise_advice": "Walk daily",
   "injury_care_advice": "Apply ice"
 }
+```
 
 ---
 
-🌐 translations
+### 🌐 translations
 
+```json id="sample-translation"
 [
   {
     "entity_type": "patient_advice",
@@ -211,53 +232,57 @@ Prevents duplicate translations like:
     "status": "verified"
   }
 ]
+```
 
 ---
 
-🔄 Data Lifecycle
+## 🔄 Data Lifecycle
 
+```id="lifecycle"
 1. User submits form
 2. Data stored in patient_advice
 3. Translation generated
 4. User verifies
 5. Data stored in translations
+```
 
 ---
 
-⚠️ Important Rules
+## ⚠️ Important Rules
 
-1. NEVER overwrite original data
+### 1. NEVER overwrite original data
 
-- Always keep original intact
-
----
-
-2. ALWAYS store original_text in translations
-
-- Even though it's in parent table
+* Always keep original intact
 
 ---
 
-3. One row per field per language
+### 2. ALWAYS store original_text in translations
 
-- Do NOT store JSON blobs
-
----
-
-4. Use consistent field_name values
-
-- Must match column names exactly
+* Even though it's in parent table
 
 ---
 
-🚀 Summary
+### 3. One row per field per language
+
+* Do NOT store JSON blobs
+
+---
+
+### 4. Use consistent field_name values
+
+* Must match column names exactly
+
+---
+
+## 🚀 Summary
 
 This database design ensures:
 
-- Clean separation of original vs translated data
-- Easy querying and debugging
-- Support for multiple languages
-- Strong data traceability
+* Clean separation of original vs translated data
+* Easy querying and debugging
+* Support for multiple languages
+* Strong data traceability
 
 ---
 
+👉 Move to next document: **04_API_Contracts.md**
