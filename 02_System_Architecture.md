@@ -1,86 +1,89 @@
-🏗️ System Architecture: Dynamic Translation System (POC)
+# 🏗️ System Architecture: Dynamic Translation System (POC)
 
 ---
 
-🎯 Objective
+## 🎯 Objective
 
 This document explains how different parts of the system interact:
 
-- Frontend (UI)
-- Backend (API server)
-- Translation Service (Sarvam AI)
-- Database
+* Frontend (UI)
+* Backend (API server)
+* Translation Service (Sarvam AI)
+* Database
 
-The goal is to clearly understand the end-to-end data flow.
+The goal is to clearly understand the **end-to-end data flow**.
 
 ---
 
-🧩 High-Level Components
+## 🧩 High-Level Components
 
+```id="components-001"
 [Frontend]  →  [Backend API]  →  [Database]
                          ↓
                  [Translation Service]
                          ↓
                     [Sarvam AI API]
+```
 
 ---
 
-🔹 Component Breakdown
+## 🔹 Component Breakdown
 
-1. Frontend (UI)
+### 1. Frontend (UI)
 
 Responsible for:
 
-- Taking user input (form)
-- Displaying translated output
-- Allowing user to verify/edit
-- Sending API requests to backend
+* Taking user input (form)
+* Displaying translated output
+* Allowing user to verify/edit
+* Sending API requests to backend
 
 ---
 
-2. Backend (API Server)
+### 2. Backend (API Server)
 
 Responsible for:
 
-- Receiving form data
-- Saving original data
-- Calling translation service
-- Returning translated data
-- Saving verified translations
+* Receiving form data
+* Saving original data
+* Calling translation service
+* Returning translated data
+* Saving verified translations
 
 ---
 
-3. Translation Service (Internal Layer)
+### 3. Translation Service (Internal Layer)
 
-This is a wrapper layer inside backend.
+This is a **wrapper layer** inside backend.
 
 Responsible for:
 
-- Sending text to Sarvam API
-- Receiving translated text
-- Handling errors/retries
+* Sending text to Sarvam API
+* Receiving translated text
+* Handling errors/retries
 
 ---
 
-4. Sarvam AI API (External Service)
+### 4. Sarvam AI API (External Service)
 
 Responsible for:
 
-- Translating text from one language to another
+* Translating text from one language to another
 
 ---
 
-5. Database
+### 5. Database
 
 Responsible for storing:
 
-- Original data (patient advice)
-- Translations (linked to original data)
+* Original data (patient advice)
+* Translations (linked to original data)
 
 ---
 
-🔄 End-to-End Flow (Detailed)
+## 🔄 End-to-End Flow (Detailed)
 
+```id="flow-002"
 Step 1: User fills the form on frontend
 
 Step 2: Frontend sends POST request to backend
@@ -108,116 +111,132 @@ Step 10: Frontend sends POST request:
          → /save-translation
 
 Step 11: Backend saves translations in DB
+```
 
 ---
 
-⚙️ Sync vs Async Behavior
+## ⚙️ Sync vs Async Behavior
 
-Current POC Approach (Simple Sync Flow)
+### Current POC Approach (Simple Sync Flow)
 
+```id="sync-flow"
 Submit Form → Backend → Call Translation API → Return Response
+```
 
-- Translation happens immediately after submission
-- User waits for response
-
----
-
-Why This Is OK for POC
-
-- Simpler to implement
-- Easier to debug
-- No need for queues/background jobs
+* Translation happens immediately after submission
+* User waits for response
 
 ---
 
-Future (Not in Scope)
+### Why This Is OK for POC
+
+* Simpler to implement
+* Easier to debug
+* No need for queues/background jobs
+
+---
+
+### Future (Not in Scope)
 
 In production, this could become async:
 
-- Background jobs
-- Message queues
-- Retry systems
+* Background jobs
+* Message queues
+* Retry systems
 
 ---
 
-🧠 Field-Level Translation Flow
+## 🧠 Field-Level Translation Flow
 
 We DO NOT send the entire form as one block.
 
 Instead:
 
+```id="field-flow"
 For each field:
    send text → translation API → get result
+```
 
 Example:
 
+```id="field-example"
 nutrition_advice → translate
 exercise_advice → translate
 injury_care_advice → translate
+```
 
 ---
 
-✅ Why This Approach?
+### ✅ Why This Approach?
 
-- Easier debugging
-- Better control
-- Prevents mapping issues
-- Allows partial retries
+* Easier debugging
+* Better control
+* Prevents mapping issues
+* Allows partial retries
 
 ---
 
-🔌 API Interaction Overview
+## 🔌 API Interaction Overview
 
-1. Submit Form API
+### 1. Submit Form API
 
 Frontend → Backend:
 
-`{
+```json id="submit-api"
+{
   "nutrition_advice": "...",
   "exercise_advice": "...",
   "injury_care_advice": "...",
   "target_language": "hi"
-}`
+}
+```
 
 ---
 
-2. Translation Happens Internally
+### 2. Translation Happens Internally
 
 Backend:
 
+```id="translation-call"
 TranslationService.translate(text, target_language)
+```
 
 ---
 
-3. Response to Frontend
+### 3. Response to Frontend
 
-`{
+```json id="translation-response"
+{
   "translations": {
     "nutrition_advice": "...",
     "exercise_advice": "...",
     "injury_care_advice": "..."
   }
-}`
+}
+```
 
 ---
 
-4. Save Translation API
+### 4. Save Translation API
 
 Frontend → Backend:
 
-`{
+```json id="save-api"
+{
   "entity_id": "123",
   "translations": {
     "nutrition_advice": "...",
     "exercise_advice": "..."
   },
   "language": "hi"
-}`
+}
+```
 
 ---
 
-🗃️ Data Flow Summary
+## 🗃️ Data Flow Summary
 
+```id="data-flow"
 User Input
    ↓
 Frontend
@@ -239,60 +258,62 @@ User Verification
 Backend API
    ↓
 Database (Translations Saved)
----
-
-⚠️ Important Design Decisions
-
-1. Original Data is Always Saved First
-
-- Never depend on translation API to store data
+```
 
 ---
 
-2. Translation is NOT Auto-Saved
+## ⚠️ Important Design Decisions
 
-- Requires user verification
+### 1. Original Data is Always Saved First
 
----
-
-3. Translations are Stored Separately
-
-- Keeps data clean and scalable
+* Never depend on translation API to store data
 
 ---
 
-4. Field-Level Mapping is Mandatory
+### 2. Translation is NOT Auto-Saved
 
-- Avoids ambiguity in data
-
----
-
-🧱 Error Handling (High-Level)
-
-Possible Failures:
-
-- Translation API fails
-- Partial translation fails
-- Invalid input
+* Requires user verification
 
 ---
 
-Expected Behavior:
+### 3. Translations are Stored Separately
 
-- Original data should still be saved
-- Failed translations should be shown as errors
-- User should be able to retry
+* Keeps data clean and scalable
 
 ---
 
-🚀 Summary
+### 4. Field-Level Mapping is Mandatory
+
+* Avoids ambiguity in data
+
+---
+
+## 🧱 Error Handling (High-Level)
+
+### Possible Failures:
+
+* Translation API fails
+* Partial translation fails
+* Invalid input
+
+---
+
+### Expected Behavior:
+
+* Original data should still be saved
+* Failed translations should be shown as errors
+* User should be able to retry
+
+---
+
+## 🚀 Summary
 
 This architecture ensures:
 
-- Clean separation of concerns
-- Easy debugging and maintenance
-- Clear data traceability
-- Simple implementation for POC
+* Clean separation of concerns
+* Easy debugging and maintenance
+* Clear data traceability
+* Simple implementation for POC
 
 ---
 
