@@ -1,0 +1,20 @@
+# VS Code
+.vscode/
+
+# Python
+backend/venv/
+backend/__pycache__/
+__pycache__/
+*.pyc
+.venv/
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+
+# System
+.DS_Store
