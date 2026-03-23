@@ -1,22 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import psycopg2
 from repository import insert_patient_advice, insert_translation, get_patient_advice_by_id
 
 app = Flask(__name__)
 CORS(app)
-
-try:
-    conn = psycopg2.connect(
-        dbname="patient_translation_db",
-        user="postgres",
-        password="admin",
-        host="localhost",
-        port="5432"
-    )
-    print("DB Connected Successfully")
-except Exception as e:
-    print("DB Error:", e)
 
 @app.route("/health")
 def health():
