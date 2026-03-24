@@ -1,6 +1,13 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from repository import insert_patient_advice, insert_translation, get_patient_advice_by_id
+from sarvamai import SarvamAI
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv("SARVAM_API_KEY")
+client = SarvamAI(api_subscription_key=api_key)
 
 app = Flask(__name__)
 CORS(app)
@@ -71,6 +78,50 @@ def save_translations():
     return jsonify({
         "message": "Translations saved successfully"
     })
+
+@app.route("/test-translate", methods=["POST"])
+def test_translate():
+    try:
+        data = request.get_json()
+
+        input_text = data.get("text")
+        source_language_code = data.get("source_language_code", "en-IN")
+        target_language_code = data.get("target_language_code", "hi-IN")
+
+        if not input_text:
+            return jsonify({"error": "text is required"}), 400
+
+        response = client.text.translate(
+            input=input_text,
+            source_language_code=source_language_code,
+            target_language_code=target_language_code,
+            model="sarvam-translate:v1",
+            #mode="formal"
+        )
+
+        translated_text = None
+
+        if hasattr(response, "translated_text"):
+            translated_text = response.translated_text
+        elif isinstance(response, dict) and "translated_text" in response:
+            translated_text = response["translated_text"]
+        else:
+            translated_text = str(response)
+
+        return jsonify({
+            "success": True,
+            "input_text": input_text,
+            "translated_text": translated_text,
+            "model": "sarvam-translate:v1",
+            #"mode": "formal"
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

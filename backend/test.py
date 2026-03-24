@@ -1,11 +1,11 @@
-from repository import insert_translation
+import os
+from dotenv import load_dotenv
 
-insert_translation(
-    "patient_advice",
-    3,
-    "nutrition_advice",
-    "Eat protein",
-    "प्रोटीन खाएं",
-    "hi",
-    "verified"
-)
+load_dotenv()
+
+api_key = os.getenv("SARVAM_API_KEY")
+
+if api_key:
+    print("API key loaded successfully")
+else:
+    print("API key not found")
