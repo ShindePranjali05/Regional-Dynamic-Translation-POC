@@ -18,6 +18,17 @@ export default function AdviceForm({ formData, setFormData, onSubmit, loading })
     <div style={styles.container}>
       <h2 style={styles.title}>Dynamic Translation Form</h2>
 
+      <label style={styles.label}>Patient ID</label>
+      <input
+        name="patient_id"
+        value={formData.patient_id}
+        onChange={handleChange}
+        style={styles.input}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        placeholder="Enter patient ID..."
+      />
+
       <label style={styles.label}>Nutrition Advice</label>
       <input
         name="nutrition_advice"
@@ -59,13 +70,20 @@ export default function AdviceForm({ formData, setFormData, onSubmit, loading })
         onFocus={handleFocus}
         onBlur={handleBlur}
       >
-        <option value="hi">Hindi</option>
-        <option value="mr">Marathi</option>
-        <option value="te">Telugu</option>
-        <option value="gu">Gujrati</option>
+        <option value="bn-IN">Bengali</option>
+        <option value="gu-IN">Gujarati</option>
+        <option value="hi-IN">Hindi</option>
+        <option value="kn-IN">Kannada</option>
+        <option value="ml-IN">Malayalam</option>
+        <option value="mr-IN">Marathi</option>
+        <option value="od-IN">Odia</option>
+        <option value="pa-IN">Punjabi</option>
+        <option value="ta-IN">Tamil</option>
+        <option value="te-IN">Telugu</option>
+
       </select>
 
-      <button onClick={onSubmit} style={styles.button}>
+      <button onClick={onSubmit} style={styles.button} disabled={loading}>
         {loading ? "Translating..." : "Submit & Translate"}
       </button>
 

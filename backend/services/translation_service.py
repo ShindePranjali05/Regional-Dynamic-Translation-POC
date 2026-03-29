@@ -10,7 +10,8 @@ class TranslationService:
             input=text,
             source_language_code=source_lang,
             target_language_code=target_lang,
-            model="sarvam-translate:v1"
+            model="mayura:v1",
+            mode="formal"
         )
 
         if hasattr(response, "translated_text"):
