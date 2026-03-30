@@ -65,14 +65,15 @@ export default function AdviceForm({ formData, setFormData, onSubmit, loading })
       <label style={styles.label}>Language</label>
       <select
         name="target_language"
+        value={formData.target_language}
         onChange={handleChange}
         style={styles.input}
         onFocus={handleFocus}
         onBlur={handleBlur}
       >
+        <option value="hi-IN">Hindi</option>
         <option value="bn-IN">Bengali</option>
         <option value="gu-IN">Gujarati</option>
-        <option value="hi-IN">Hindi</option>
         <option value="kn-IN">Kannada</option>
         <option value="ml-IN">Malayalam</option>
         <option value="mr-IN">Marathi</option>
@@ -83,7 +84,15 @@ export default function AdviceForm({ formData, setFormData, onSubmit, loading })
 
       </select>
 
-      <button onClick={onSubmit} style={styles.button} disabled={loading}>
+      <button
+        onClick={onSubmit}
+        style={{
+          ...styles.button,
+          opacity: loading ? 0.7 : 1,
+          cursor: loading ? "not-allowed" : "pointer"
+        }}
+        disabled={loading}
+      >
         {loading ? "Translating..." : "Submit & Translate"}
       </button>
 

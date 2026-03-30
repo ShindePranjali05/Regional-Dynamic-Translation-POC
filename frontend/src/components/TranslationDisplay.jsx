@@ -7,6 +7,12 @@ export default function TranslationDisplay({
   onSave,
   saving
 }) {
+  const fieldOrder = [
+    "nutrition_advice",
+    "exercise_advice",
+    "injury_care_advice"
+  ];
+
   const formatLabel = (key) => {
     return key
       .replaceAll("_", " ")
@@ -24,31 +30,42 @@ export default function TranslationDisplay({
     <div style={styles.container}>
       <h3 style={styles.title}>Translated Output</h3>
 
-      {Object.keys(translations).map((key) => (
-        <div key={key} style={styles.card}>
-          <p style={styles.label}>{formatLabel(key)}</p>
+      {fieldOrder
+        .filter((key) => key in translations)
+        .map((key) => (
+          <div key={key} style={styles.card}>
+            <p style={styles.label}>{formatLabel(key)}</p>
 
-          <p style={styles.original}>
-            <span style={styles.subLabel}>Original:</span> {formData[key]}
-          </p>
+            <p style={styles.original}>
+              <span style={styles.subLabel}>Original:</span> {formData[key]}
+            </p>
 
-          <p style={styles.subLabel}>Translated:</p>
+            <p style={styles.subLabel}>Translated:</p>
 
-          {translations[key] && translations[key].trim() !== "" ? (
-            <input
-              type="text"
-              value={translations[key]}
-              onChange={(e) => handleChange(key, e.target.value)}
-              style={styles.input}
-              placeholder={`Edit ${formatLabel(key)} translation`}
-            />
-          ) : (
-            <p style={styles.error}>Translation failed. Please retry.</p>
-          )}
-        </div>
-      ))}
+            {translations[key] && translations[key].trim() !== "" ? (
+              <input
+                type="text"
+                value={translations[key]}
+                onChange={(e) => handleChange(key, e.target.value)}
+                style={styles.input}
+                placeholder={`Edit ${formatLabel(key)} translation`}
+                disabled={saving}
+              />
+            ) : (
+              <p style={styles.error}>Translation failed. Please retry.</p>
+            )}
+          </div>
+        ))}
 
-      <button onClick={onSave} style={styles.button} disabled={saving}>
+      <button
+        onClick={onSave}
+        style={{
+          ...styles.button,
+          opacity: saving ? 0.7 : 1,
+          cursor: saving ? "not-allowed" : "pointer"
+        }}
+        disabled={saving}
+      >
         {saving ? "Saving..." : "Save Translations"}
       </button>
     </div>
@@ -63,14 +80,12 @@ const styles = {
     borderRadius: "10px",
     border: "1px solid #c8e6c9"
   },
-
   title: {
     marginBottom: "12px",
     color: "#2e7d32",
     fontSize: "16px",
     fontWeight: "600"
   },
-
   card: {
     background: "#ffffff",
     padding: "8px 10px",
@@ -79,26 +94,22 @@ const styles = {
     border: "1px solid #e0e0e0",
     boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
   },
-
   label: {
     fontWeight: "600",
     marginBottom: "2px",
     fontSize: "12px",
     color: "#2f2f2f"
   },
-
   subLabel: {
     fontWeight: "500",
     fontSize: "12px",
     color: "#444"
   },
-
   original: {
     marginBottom: "6px",
     color: "#666",
     fontSize: "11px"
   },
-
   input: {
     width: "100%",
     padding: "6px 8px",
@@ -109,7 +120,6 @@ const styles = {
     fontSize: "13px",
     transition: "all 0.2s ease"
   },
-
   error: {
     color: "#c62828",
     background: "#fdecea",
@@ -117,7 +127,6 @@ const styles = {
     borderRadius: "4px",
     fontSize: "12px"
   },
-
   button: {
     marginTop: "10px",
     padding: "10px",
@@ -125,9 +134,7 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "6px",
-    cursor: "pointer",
     fontSize: "13px",
-    fontWeight: "500",
-    opacity: 1
+    fontWeight: "500"
   }
 };
