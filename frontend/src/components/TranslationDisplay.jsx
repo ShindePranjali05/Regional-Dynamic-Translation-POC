@@ -37,23 +37,20 @@ export default function TranslationDisplay({
             <p style={styles.label}>{formatLabel(key)}</p>
 
             <p style={styles.original}>
-              <span style={styles.subLabel}>Original:</span> {formData[key]}
+              <span style={styles.subLabel}>Original:</span>{" "}
+              {formData[key] || ""}
             </p>
 
             <p style={styles.subLabel}>Translated:</p>
 
-            {translations[key] && translations[key].trim() !== "" ? (
-              <input
-                type="text"
-                value={translations[key]}
-                onChange={(e) => handleChange(key, e.target.value)}
-                style={styles.input}
-                placeholder={`Edit ${formatLabel(key)} translation`}
-                disabled={saving}
-              />
-            ) : (
-              <p style={styles.error}>Translation failed. Please retry.</p>
-            )}
+            <input
+              type="text"
+              value={translations[key] || ""}
+              onChange={(e) => handleChange(key, e.target.value)}
+              style={styles.input}
+              placeholder={`Edit ${formatLabel(key)} translation`}
+              disabled={saving}
+            />
           </div>
         ))}
 
@@ -119,13 +116,6 @@ const styles = {
     background: "#f9fbf9",
     fontSize: "13px",
     transition: "all 0.2s ease"
-  },
-  error: {
-    color: "#c62828",
-    background: "#fdecea",
-    padding: "6px",
-    borderRadius: "4px",
-    fontSize: "12px"
   },
   button: {
     marginTop: "10px",

@@ -40,15 +40,20 @@ export default function App() {
       return;
     }
 
-    if (
-      !formData.nutrition_advice ||
-      !formData.exercise_advice ||
-      !formData.injury_care_advice ||
-      !formData.target_language
-    ) {
-      showToast("error", "Please fill all fields");
+    if (!formData.target_language) {
+      showToast("error", "Please select language");
       return;
     }
+
+    if (
+      !formData.nutrition_advice &&
+      !formData.exercise_advice &&
+      !formData.injury_care_advice
+    ) {
+      showToast("error", "Please fill at least one advice field");
+      return;
+    }
+
 
     setLoading(true);
     try {
@@ -63,7 +68,7 @@ export default function App() {
       setTranslations(res.translations || {});
       showToast("success", "Translations generated successfully ");
     } catch (err) {
-      showToast("error", "Translation failed");
+      showToast("error", err.message || "Translation failed");
       console.error(err);
     } finally {
       setLoading(false);
@@ -84,9 +89,16 @@ export default function App() {
     };
 
     for (const key in translations) {
+      const originalText = formData[key]?.trim();
+      const translatedText = translations[key]?.trim();
+
+      if (!originalText || !translatedText) {
+        continue;
+      }
+
       payload.translations[key] = {
-        original_text: formData[key],
-        translated_text: translations[key]
+        original_text: originalText,
+        translated_text: translatedText
       };
     }
 
@@ -113,7 +125,7 @@ export default function App() {
         setEntityId(null);
       }, 2300);
     } catch (err) {
-      showToast("error", "Save failed");
+      showToast("error", "Failed to save translations");
       console.error(err);
     } finally {
       setSaving(false);

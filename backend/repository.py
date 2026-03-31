@@ -16,88 +16,136 @@ def get_connection():
 
 
 def insert_patient_advice(patient_id, nutrition, exercise, injury_care):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    cursor.execute("""
-        INSERT INTO patient_advice
-        (patient_id, nutrition_advice, exercise_advice, injury_care_advice)
-        VALUES (%s, %s, %s, %s)
-        RETURNING id;
-    """, (patient_id, nutrition, exercise, injury_care))
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    entity_id = cursor.fetchone()[0]
+        cursor.execute("""
+            INSERT INTO patient_advice
+            (patient_id, nutrition_advice, exercise_advice, injury_care_advice)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id;
+        """, (patient_id, nutrition, exercise, injury_care))
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        entity_id = cursor.fetchone()[0]
+        conn.commit()
+        return entity_id
 
-    return entity_id
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print("Error inserting patient advice:", e)
+        return None
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 def upsert_translation(entity_type, entity_id, field_name, original_text, translated_text, language_code, status):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    cursor.execute("""
-        INSERT INTO translations
-        (entity_type, entity_id, field_name, original_text, translated_text, language_code, status)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (entity_type, entity_id, field_name, language_code)
-        DO UPDATE SET
-            original_text = EXCLUDED.original_text,
-            translated_text = EXCLUDED.translated_text,
-            status = EXCLUDED.status;
-    """, (
-        entity_type,
-        entity_id,
-        field_name,
-        original_text,
-        translated_text,
-        language_code,
-        status
-    ))
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        cursor.execute("""
+            INSERT INTO translations
+            (entity_type, entity_id, field_name, original_text, translated_text, language_code, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (entity_type, entity_id, field_name, language_code)
+            DO UPDATE SET
+                original_text = EXCLUDED.original_text,
+                translated_text = EXCLUDED.translated_text,
+                status = EXCLUDED.status;
+        """, (
+            entity_type,
+            entity_id,
+            field_name,
+            original_text,
+            translated_text,
+            language_code,
+            status
+        ))
+
+        conn.commit()
+        return True
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print("Error upserting translation:", e)
+        return False
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 def get_patient_advice_by_id(entity_id):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    cursor.execute("""
-        SELECT id, patient_id, nutrition_advice, exercise_advice, injury_care_advice
-        FROM patient_advice
-        WHERE id = %s;
-    """, (entity_id,))
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    row = cursor.fetchone()
+        cursor.execute("""
+            SELECT id, patient_id, nutrition_advice, exercise_advice, injury_care_advice
+            FROM patient_advice
+            WHERE id = %s;
+        """, (entity_id,))
 
-    cursor.close()
-    conn.close()
+        row = cursor.fetchone()
+        return row
 
-    return row
+    except Exception as e:
+        print("Error fetching patient advice by id:", e)
+        return None
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 def find_existing_patient_advice(patient_id, nutrition, exercise, injury_care):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    cursor.execute("""
-        SELECT id, patient_id, nutrition_advice, exercise_advice, injury_care_advice
-        FROM patient_advice
-        WHERE patient_id = %s
-          AND nutrition_advice = %s
-          AND exercise_advice = %s
-          AND injury_care_advice = %s
-        ORDER BY id DESC
-        LIMIT 1;
-    """, (patient_id, nutrition, exercise, injury_care))
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    row = cursor.fetchone()
+        cursor.execute("""
+            SELECT id, patient_id, nutrition_advice, exercise_advice, injury_care_advice
+            FROM patient_advice
+            WHERE patient_id = %s
+              AND nutrition_advice = %s
+              AND exercise_advice = %s
+              AND injury_care_advice = %s
+            ORDER BY id DESC
+            LIMIT 1;
+        """, (patient_id, nutrition, exercise, injury_care))
 
-    cursor.close()
-    conn.close()
+        row = cursor.fetchone()
+        return row
 
-    return row
+    except Exception as e:
+        print("Error finding existing patient advice:", e)
+        return None
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

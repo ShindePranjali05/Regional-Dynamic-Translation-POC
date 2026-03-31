@@ -1,6 +1,5 @@
 from sarvamai import SarvamAI
 
-
 class TranslationService:
     def __init__(self, api_key):
         self.client = SarvamAI(api_subscription_key=api_key)
@@ -26,13 +25,19 @@ class TranslationService:
         translated_data = {}
 
         for field_name, field_value in fields_data.items():
-            if field_value and isinstance(field_value, str):
+            if field_value is None:
+                translated_data[field_name] = ""
+
+            elif isinstance(field_value, str) and field_value.strip() == "":
+                translated_data[field_name] = ""
+
+            elif isinstance(field_value, str):
                 translated_data[field_name] = self.translate_text(
                     field_value,
                     source_lang,
                     target_lang
                 )
             else:
-                translated_data[field_name] = field_value
+                translated_data[field_name] = ""
 
         return translated_data

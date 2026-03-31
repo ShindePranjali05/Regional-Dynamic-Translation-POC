@@ -19,16 +19,13 @@ CORS(app)
 api_key = os.getenv("SARVAM_API_KEY")
 translation_service = TranslationService(api_key)
 
-
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "OK"}), 200
 
-
 @app.route("/", methods=["GET"])
 def home():
     return "Server is running", 200
-
 
 @app.route("/submit-and-translate", methods=["POST"])
 def submit_and_translate():
@@ -88,7 +85,6 @@ def submit_and_translate():
     except Exception as e:
         return jsonify({"error": f"Translation failed: {str(e)}"}), 500
 
-
 @app.route("/save-translations", methods=["POST"])
 def save_translations():
     try:
@@ -135,7 +131,6 @@ def save_translations():
 
     except Exception as e:
         return jsonify({"error": f"Save failed: {str(e)}"}), 500
-
 
 @app.route("/patient-advice/<int:entity_id>", methods=["GET"])
 def get_patient_advice(entity_id):
